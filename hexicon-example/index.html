@@ -5,9 +5,24 @@
 
 var x1;
 var x2;
+var timetext;
 function init() {
-  x1 = new Hexicon(document.getElementById('hex-1'), 'test message');
-  x2 = new Hexicon(document.getElementById('hex-2'));
+	x1 = new Hexicon(document.getElementById('hex-1'), 'test message');
+
+	timetext = document.getElementById('clock');
+	var ds = new Date().toLocaleString();
+	timetext.innerHTML = ds;
+	x2 = new Hexicon(document.getElementById('hex-2'), ds);
+	timeLoop();
+}
+
+function timeLoop() {
+	window.setTimeout(function() {
+		var ds = new Date().toLocaleString();
+		timetext.innerHTML = ds;
+		x2.updateText(ds);
+		timeLoop();
+	}, 2170);
 }
 
 function alter(newText) {
@@ -17,17 +32,41 @@ function alter(newText) {
 
 </script>
 
+<style>
+	body {
+		font-family: arial, sans;
+	}
+	div.col {
+		margin: 20px;
+		padding: 20px;
+		background-color: #EEE;
+		border-radius: 10px;
+		display: inline-block;
+	}
+
+	#clock {
+		font-size: 0.8em;
+	}
+</style>
+
 </head>
 
 <body onLoad="init()">
 
-<svg style="margin: 20px;" id="hex-1" width="200" height="250"></svg>
-<svg style="margin: 20px;" id="hex-2" data-text="this is a test" width="100" height="125"></svg>
+<div class="col">
+	<svg style="margin: 20px;" id="hex-1" width="200" height="250"></svg> <br />
+	<input placeholder="some text to change" onChange="alter(this.value);" />
+</div>
 
-<p>
-<input placeholder="some text to change" onChange="alter(this.value);" />
-</p>
+<div class="col">
+	<svg style="margin: 20px;" id="hex-2" width="100" height="125"></svg> <br />
+	<span id="clock" />
+</div>
 
-<a href="https://github.com/naknomum/hexicon">Hexicon.js</a>
+
+<div>
+	Made with <a href="https://github.com/naknomum/hexicon">Hexicon.js</a>.
+</div>
+
 </body>
 </html>
