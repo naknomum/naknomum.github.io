@@ -1,0 +1,30 @@
+<html><head><title>hexicon examples</title>
+<script src="Hexicon.js"></script>
+
+<script>
+
+var x1;
+var x2;
+function init() {
+  x1 = new Hexicon(document.getElementById('hex-1'), 'test message');
+  x2 = new Hexicon(document.getElementById('hex-2'));
+}
+
+function alter(newText) {
+	document.getElementById('hex-1').setAttribute('title', newText);
+	x1.updateText(newText);
+}
+
+</script>
+
+</head>
+
+<body onLoad="init()">
+
+<svg style="margin: 20px;" id="hex-1" width="200" height="250"></svg>
+<svg style="margin: 20px;" id="hex-2" data-text="this is a test" width="100" height="125"></svg>
+
+<p>
+<input placeholder="some text to change" onChange="alter(this.value);" />
+</body>
+</html>
