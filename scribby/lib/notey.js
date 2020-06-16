@@ -28,6 +28,7 @@ class Notey {
     constructor(json) {
         if (typeof(json) != 'object') json = {};
         this.version = '1.0b';  //TODO could check against json.version ??
+        this.readOnly = json.readOnly || false;
         this.storeLocal = true;
         this.wobbly = false;  //causes slight tilt (rotation) when dragged ... broken for now!  :(   FIXME
         this.el = null;
@@ -52,18 +53,19 @@ class Notey {
         this.strokeColorId = json.strokeColorId || 0;
         this.el.style.left = (json.x || Math.floor(Math.random() * 80) + 20) + 'px';
         this.el.style.top = (json.y || Math.floor(Math.random() * 80) + 20) + 'px';
-        var s = Math.floor(Math.random() * 60) + 150;
-        this.el.style.width = (json.width || s) + 'px';
-        this.el.style.height = (json.height || s) + 'px';
+        this.el.style.width = (json.width || 200) + 'px';
+        this.el.style.height = (json.height || 200) + 'px';
         this.el.style.backgroundColor = Notey.colorChoices[this.bgColorId];
         this.init();
         this.scribby = new Scribby(this.svg, json.scribby);
+        if (this.readOnly) this.svg.style.pointerEvents = 'none';
         if (this.strokeColorId != 0) this.scribby.setAttrStroke(Notey.colorChoices[this.strokeColorId]);
         Notey.allNoteys[this.id] = this;
         return this;
     }
 
     init() {
+        this.initStyles();
         var me = this;
         this.canvas = document.createElement('canvas');
         if (this.wobbly) this.el.style.transform = 'rotate(' + (8 - Math.random() * 16) + 'deg)';
@@ -72,9 +74,11 @@ class Notey {
         this.dragbar.id = this.id + '-dragbar';
         this.dragbar.classList.add('dragbar');
         var cbg = (this.strokeColorId == 0) ? '' : ' style="background-color: ' + Notey.colorChoices[this.strokeColorId] + '" ';
-        var h = '<div class="dragbar-button dragbar-close" onClick="Notey.dragbarClick(this)">&#x2715;</div>';
-        h += '<div class="dragbar-button dragbar-reset" onClick="Notey.dragbarClick(this)">!</div>';
-        h += '<div ' + cbg + ' id="dragbar-button-color-' + this.id + '" class="dragbar-button dragbar-color" onClick="Notey.dragbarClick(this)">#</div>';
+        var h = '<div class="dragbar-button dragbar-close" onClick="Notey.dragbarClick(this)"></div>';
+        h += '<div class="dragbar-button dragbar-reset" onClick="Notey.dragbarClick(this)"></div>';
+        h += '<div ' + cbg + ' id="dragbar-button-color-' + this.id + '" class="dragbar-button dragbar-color" onClick="Notey.dragbarClick(this)"></div>';
+        h += '<div class="dragbar-button dragbar-download" title="svg (shift=png)" onClick="Notey.dragbarClick(this)"></div>';
+        h += '<div class="dragbar-button dragbar-share" onClick="Notey.dragbarClick(this)"></div>';
         h += '</div>';
         this.dragbar.innerHTML = h;
         this.el.appendChild(this.dragbar);
@@ -142,6 +146,34 @@ class Notey {
         }
     }
 
+    initStyles() {
+        var st = document.createElement('style');
+        st.innerHTML = '.draggy { position: absolute; }';
+        st.innerHTML += '.draggy svg { cursor: crosshair; }';
+        st.innerHTML += '.dragging { opacity: 0.6; }';
+        st.innerHTML += '.dragbar { overflow: hidden; position: absolute; width: 100%; background-color: rgba(0,0,0,0.1); display: none; height: 30px; cursor: grab; }';
+        st.innerHTML += '.draggy:hover { 1px 1px 2px 2px rgba(0,0,0,0.2); }';
+        st.innerHTML += '.draggy:hover .dragbar { display: block; }';
+        st.innerHTML += '.drag-down .dragbar, .dragging .dragbar { cursor: grabbing; }';
+        st.innerHTML += '.dragbar-button { width: 24px; height: 24px; background-color: #888; margin: 3px 2px; cursor: pointer; border-radius: 3px; ';
+        st.innerHTML += 'float: right; } .dragbar-button:hover { background-color: #666; }';
+        st.innerHTML += '.dragbar-close { background-image: url("' +
+            Notey.makeDataUrl('image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path fill="#eec" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>') + '"); }';
+        st.innerHTML += '.dragbar-color { background-image: url("' +
+            Notey.makeDataUrl('image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path fill="#eec" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>') + '"); }';
+        st.innerHTML += '.dragbar-reset { background-image: url("' +
+            Notey.makeDataUrl('image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path fill="#eec" d="M14 12c0-1.1-.9-2-2-2s-2 .9-2 2 .9 2 2 2 2-.9 2-2zm-2-9c-4.97 0-9 4.03-9 9H0l4 4 4-4H5c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.44C8.04 20.3 9.94 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>') + '"); }';
+        st.innerHTML += '.dragbar-share { background-image: url("' +
+            Notey.makeDataUrl('image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path fill="#eec" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>') + '"); }';
+        st.innerHTML += '.dragbar-download { background-image: url("' +
+            Notey.makeDataUrl('image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path fill="#eec" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>') + '"); }';
+        document.head.appendChild(st);
+    }
+
+    static makeDataUrl(mimeType, content) {
+        return 'data:' + mimeType + ';base64,' + window.btoa(content);
+    }
+
     attachToBody() {
         document.getElementsByTagName('body')[0].appendChild(this.el);
     }
@@ -159,7 +191,7 @@ class Notey {
         this.save();
     }
 
-    getDataURL(callback) {
+    getPngDataURL(callback) {
         this.updateCanvas(function(ctx) { callback(ctx.canvas.toDataURL()); });
     }
 
@@ -176,6 +208,7 @@ class Notey {
     }
 
     save(noSync) {
+        if (this.readOnly) return;
         Notey._needTextSave = false;
         this.dateSaved = new Date();
         if (!this.storeLocal) return;
@@ -198,6 +231,7 @@ class Notey {
             this.el.dispatchEvent(new Event('notey.deleted'));  //kinda hack, as it happens *before* we actually kill off this element!
             if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
         }
+        if (this.readOnly) return;
         if (this.storeLocal) window.localStorage.removeItem(this.localStorageKey());
         //TODO other stuff here on the object itself!
         delete(Notey.allNoteys[this.id]);
@@ -206,7 +240,7 @@ class Notey {
 
     // this is tailored to jsonblob api! (e.g. PUT vs POST)    TODO generalize
     sync() {
-        if (!Notey.remoteUrl) return false;
+        if (!Notey.remoteUrl || this.readOnly) return false;
         var method = 'POST';
         var url = Notey.remoteUrl;
         if (this.remoteId) {  //if it has already been stored (has id) then we PUT
@@ -236,7 +270,7 @@ class Notey {
     }
 
     remoteDelete() {
-        if (!this.remoteId) return;
+        if (!this.remoteId || this.readOnly) return;
         console.warn('remoteDelete() on %s', this.id);
         this.el.dispatchEvent(new Event('notey.remoteDeleted'));  //doing pre-rest cuz this.el will go away very soon!
         Resty.delete(this.remoteId)
@@ -251,14 +285,16 @@ class Notey {
         if ((this._keyX != Notey.mouseEvent.offsetX) || (this._keyY != Notey.mouseEvent.offsetY)) {
             this._keyX = Notey.mouseEvent.offsetX;
             this._keyY = Notey.mouseEvent.offsetY;
+            this._keyText = '';
             if (ev.keyCode > 31) this._keyText = ev.key;
-        } else if (ev.keyCode > 31) {
+        } else if ((ev.keyCode > 31) && (this._keyText != undefined)) {
             this._keyText += ev.key;
         } else if ((ev.keyCode == 8) && (this._keyText.length > 0)) {
             this._keyText = this._keyText.substring(0, this._keyText.length - 1);
         } else {
             return;
         }
+        if (this._keyText == undefined) return;
 //console.log('%d (%d,%d) %s', ev.keyCode, this._keyX, this._keyY, this._keyText);
         var tid = 'text-' + this._keyX + '-' + this._keyY;
         var tel = this.svg.getElementById(tid);
@@ -370,6 +406,42 @@ class Notey {
         } else if (buttonEl.classList.contains('dragbar-color')) {
             note.toggleColor();
             note.updateModified();
+        } else if (buttonEl.classList.contains('dragbar-download')) {
+            if (Notey.shiftDown) {
+	        note.getPngDataURL(function(dataURL) {
+                    var dl = document.createElement('a');
+                    dl.href = dataURL;
+                    dl.download = 'notey-' + note.id + '-' + new Date().getTime() + '.png';
+                    dl.click();
+	        });
+                return;
+            }
+            var dl = document.createElement('a');
+            dl.href = Notey.makeDataUrl('image/svg+xml', '<!-- notey ' + note.version + ' https://github.com/naknomum/scribby created ' + new Date().toISOString() + ' at ' + document.location.href + ' id=' + note.id + ' -->' + note.svg.outerHTML);
+            dl.download = 'notey-' + note.id + '-' + new Date().getTime() + '.svg';
+            dl.click();
+        } else if (buttonEl.classList.contains('dragbar-share')) {
+            var sh = document.createElement('div');
+            sh.style.position = 'absolute';
+            sh.style.top = '40px';
+            sh.style.left = '-50%';
+            sh.style.width = '200%';
+            sh.style.backgroundColor = '#EEE';
+            sh.style.padding = '6px';
+            sh.style.border = 'solid 2px #CCC';
+            var h = '<div style="width: 15%; display: inline-block">svg</div><input style="width: 80%;" onClick="this.select(); document.execCommand(\'copy\');" value="' + Notey.makeDataUrl('image/svg+xml', note.svg.outerHTML) + '" /><br />';
+            h += '<div style="width: 15%; display: inline-block">png</div><input id="png-src" style="width: 80%;" onClick="this.select(); document.execCommand(\'copy\');" value="" /><br />';
+            //not yet implemented:
+            //if (note.remoteId && note.shareable) h += '<div style="width: 15%; display: inline-block">share</div><input style="width: 80%;" onClick="this.select()" value="' + document.location.href + '#Notey-' + note.id + '" /><br />';
+            h += '<div style="text-align: center; margin-top: 5px;"><img style="width: ' + note.el.clientWidth + 'px; height: ' + note.el.clientHeight + 'px; border: solid 1px #888;" id="png-img" /></div>';
+            h += '<div style="position: absolute; bottom: 4px; right: 4px;" class="dragbar-button dragbar-close" onClick="this.parentElement.remove()"></div>'
+            //maybe to explore: copying image to clipboard - https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
+            sh.innerHTML = h;
+            note.el.appendChild(sh);
+	    note.getPngDataURL(function(dataURL) {
+                document.getElementById('png-src').value = dataURL;
+                document.getElementById('png-img').src = dataURL;
+            });
         } else {
             console.warn('unknown dragbar button %o on %o', buttonEl, note);
         }
