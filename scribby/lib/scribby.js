@@ -10,6 +10,7 @@ class Scribby {
         this.path = null;
         this.buffer = [];
         this.strPath = null;
+        this._undid = [];
 
         if (json.svg && json.svg.content) svgEl.innerHTML = json.svg.content;
 
@@ -57,12 +58,20 @@ class Scribby {
     }
 
     eventUp(ev) {
-        if (this.path) this.path = null;
+        if (!this.path) return false;
+        if (!this.path.getTotalLength()) {  //empty path cuz was just click
+            this.svgEl.lastElementChild.remove();
+            this.path = null;
+            return false;
+        }
+        this.path = null;
         this.updateModified();
+        return true;
     }
 
     reset() {
         this.svgEl.innerHTML = '';
+        this._undid = [];
         this.updateModified();
     }
 
@@ -124,6 +133,17 @@ class Scribby {
         return Math.floor(d * 100) / 100;
     }
 
+    undo() {
+        if (!this.svgEl.lastElementChild || ((this.svgEl.lastElementChild.nodeName != 'path') && (this.svgEl.lastElementChild.nodeName != 'text'))) return false;
+        this._undid.push(this.svgEl.lastElementChild.cloneNode(true));
+        this.svgEl.lastElementChild.remove();
+        return true;
+    }
+    redo() {
+        if (!this._undid.length) return false;
+        this.svgEl.appendChild(this._undid.pop());
+        return true;
+    }
 
     // might be of some interest for later -- https://mourner.github.io/simplify-js/
 
