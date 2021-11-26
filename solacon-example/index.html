@@ -1,0 +1,77 @@
+<html><head><title>Solacon examples</title>
+<script src="Solacon.svg"></script>
+
+<script>
+
+var sol1;
+var sol2;
+var timetext;
+function init() {
+	sol1 = document.getElementById('sol-1');
+	sol2 = document.getElementById('sol-2');
+	timetext = document.getElementById('clock');
+	var ds = new Date().toLocaleString();
+	timetext.innerHTML = ds;
+	timeLoop();
+}
+
+function timeLoop() {
+	window.setTimeout(function() {
+		var ds = new Date().toLocaleString();
+		timetext.innerHTML = ds;
+		sol2.setRGB();
+		sol2.generate(ds);
+		timeLoop();
+	}, 2170);
+}
+
+function alter(newText) {
+	sol1.generate(newText);
+}
+
+</script>
+
+<style>
+	body {
+		font-family: arial, sans;
+	}
+	div.col {
+		margin: 20px;
+		padding: 20px;
+		background-color: #EEE;
+		border-radius: 10px;
+		display: inline-block;
+	}
+
+	#clock {
+		font-size: 0.8em;
+	}
+</style>
+
+</head>
+
+<body onLoad="init()">
+
+<div class="col">
+	<object type="image/svg+xml" style="width: 320px; height: 320px;" id="sol-1"
+		data="solacon.svg"
+		data-value="Hello world."
+		data-rgb="0, 30, 255"
+	></object><br />
+	<input placeholder="some text to change" onChange="alter(this.value);" />
+</div>
+
+<div class="col">
+	<object type="image/svg+xml" style="width: 320px; height: 320px;" id="sol-2"
+		data="solacon.svg"
+	></object><br />
+	<span id="clock" />
+</div>
+
+
+<div>
+	Made with <a href="https://github.com/naknomum/solacon">Solacon.svg</a>.
+</div>
+
+</body>
+</html>
