@@ -1,4 +1,14 @@
 <!DOCTYPE html><html><head><title>scribby examples</title>
+<style>
+.scribby-embedded {
+	width: 400px;
+	height: 300px;
+	background-color: #DDD;
+	border-radius: 8px;
+	margin: 15px;
+	cursor: crosshair;
+}
+</style>
 <script src="lib/scribby.js"></script>
 <script src="lib/draggy.js"></script>
 <script src="lib/notey.js"></script>
@@ -96,6 +106,17 @@ viewBox="0 0 600 400" enable-background="new 0 0 600 400" xml:space="preserve">
 	<button onClick="addNotey()">New Notey</button>
 	And some notes...
 </div>
+<hr />
+<h2>Using simple embeddable svg</h2>
+<div>
+<xmp><object data="scribby-embed.svg"></object></xmp>
 
+<object data="lib/scribby-embed.svg" class="scribby-embedded" id="demo-1"></object>
+<object data="lib/scribby-embed.svg" class="scribby-embedded" id="demo-2"></object>
+<object data="lib/scribby-embed.svg" class="scribby-embedded" id="demo-3"></object>
+</div>
+
+
+<hr />
 <div style="margin-top: 30px; font-size: 0.8em;">Created with <a href="https://github.com/naknomum/scribby">scribby</a>.</div>
 </body></html>
