@@ -99,8 +99,8 @@ html, body {
 <div>
 svg element enabled with scribby:<br />
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
-	id="svgElement" x="0px" y="0px" width="600px" height="400px"
-viewBox="0 0 600 400" enable-background="new 0 0 600 400" xml:space="preserve">
+	id="svgElement" x="0px" y="0px" width="600px" height="300px"
+viewBox="0 0 600 300" enable-background="new 0 0 600 300" xml:space="preserve">
 
 <div>
 	<button onClick="addNotey()">New Notey</button>
@@ -110,6 +110,7 @@ viewBox="0 0 600 400" enable-background="new 0 0 600 400" xml:space="preserve">
 <h2>Using simple embeddable svg</h2>
 <div>
 <xmp><object data="scribby-embed.svg"></object></xmp>
+<div style="text-align: right; margin: 30px; font-size: 0.9em;">Created with <a href="https://github.com/naknomum/scribby">scribby</a>.</div>
 
 <div>
 <input type="button" value="clear drawings below" onClick="document.getElementById('demo-1').scribby.resetAll();" />
@@ -120,7 +121,4 @@ viewBox="0 0 600 400" enable-background="new 0 0 600 400" xml:space="preserve">
 <object data="lib/scribby-embed.svg" class="scribby-embedded" id="demo-3"></object>
 </div>
 
-
-<hr />
-<div style="margin-top: 30px; font-size: 0.8em;">Created with <a href="https://github.com/naknomum/scribby">scribby</a>.</div>
 </body></html>
